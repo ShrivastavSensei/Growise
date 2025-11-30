@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Growise - Personal Wellbeing</title>
+    <title>UnpluX: Disconnect to Reconnect</title>
     
     <!-- PWA Setup Links -->
     <link rel="manifest" href="manifest.json">
@@ -86,7 +86,7 @@
         <!-- Header -->
         <header class="flex justify-between items-center py-4 border-b border-gray-200 mb-6">
             <h1 class="text-3xl font-extrabold text-primary">
-                <span class="text-secondary">Grow</span>ise
+                <span class="text-secondary">UnpluX:</span> Disconnect to Reconnect
             </h1>
             <div id="user-info" class="text-sm text-gray-600 flex items-center">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-1 text-secondary">
@@ -107,7 +107,7 @@
         <main>
             <!-- Login Prompt (Initially Visible) -->
             <div id="login-prompt" class="bg-card p-8 rounded-xl shadow-xl border-t-4 border-secondary text-center space-y-6">
-                <h2 class="text-2xl font-bold text-gray-800">Welcome to Growise!</h2>
+                <h2 class="text-2xl font-bold text-gray-800">Welcome to UnpluX!</h2>
                 <p class="text-gray-600">Please sign in to access your personal dashboard, track rewards, and talk to WiseMind.</p>
                 <div class="space-y-3 max-w-sm mx-auto">
                     <button id="google-login-btn" class="w-full py-3 px-4 flex items-center justify-center bg-red-500 text-white font-semibold rounded-lg shadow-md hover:bg-red-600 transition-all">
@@ -268,6 +268,7 @@
     </div>
 
     <script>
+        // --- NOTE: THE CHATBOT IS CONNECTED VIA PROXY TO AVOID CORS ERRORS ---
         const API_KEY = "AIzaSyBkhBGjSpPNUk_SnOzcH5pIsXBnyASC2aU"; // <<< CRITICAL: REPLACE WITH YOUR GEMINI API KEY >>>
         const MODEL_NAME = 'gemini-2.5-flash-preview-09-2025';
 
@@ -295,11 +296,14 @@
 
         async function initializeAppAndAuth() {
             try {
-                // We use the provided config for the app (USER_FIREBASE_CONFIG)
+                // Initialize Firebase App instance
                 const app = initializeApp(USER_FIREBASE_CONFIG);
+                
+                // Initialize other services using the app instance
                 db = getFirestore(app);
                 auth = getAuth(app);
-                analytics = getAnalytics(app);
+                analytics = getAnalytics(app); // Initializing Analytics
+
                 
                 // Hide the main content until authentication status is determined
                 document.getElementById('dashboard').classList.add('hidden');
@@ -379,6 +383,9 @@
                      errorMessage = 'Sign-in cancelled.';
                 } else if (error.code === 'auth/account-exists-with-different-credential') {
                     errorMessage = 'This email is already registered with another provider.';
+                } else if (error.code === 'auth/unauthorized-domain') {
+                    // Specific fix reminder for the user
+                    errorMessage = 'The domain or APK signature is not authorized in your Firebase console. Please ensure the domain (e.g., localhost) or the SHA-1 key is added.';
                 }
                 showMessage('Sign-in Failed', `Error: ${errorMessage}. Please try again.`);
             }
